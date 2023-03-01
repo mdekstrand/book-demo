@@ -15,5 +15,5 @@ space = [
 def default():
     return ImplicitMF(50)
 
-def from_params(features, ureg, ireg, weight, epochs):
+def from_params(features, ureg, ireg, weight, epochs, mrr=None):
     return ImplicitMF(features, reg=(ureg, ireg), weight=weight, iterations=epochs)

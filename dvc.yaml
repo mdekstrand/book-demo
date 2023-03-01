@@ -3,7 +3,7 @@ stages:
     foreach:
     - ials
     do:
-      cmd: python tune-algo.py -o params/${item}-action-core.json data/action-core ${item}
+      cmd: python tune-algo.py -o params/${item}-action-core.json -r params/${item}-action-core.csv data/action-core ${item}
       deps:
       - data/action-core/tune-train.parquet
       - data/action-core/tune-test.parquet
@@ -11,3 +11,4 @@ stages:
       outs:
       - params/${item}-action-core.json:
           cache: false
+      - params/${item}-action-core.csv

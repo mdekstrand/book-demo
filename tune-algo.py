@@ -7,6 +7,8 @@ Usage:
 Options:
     -v, --verbose
         Increase logging verbosity.
+    -r FILE, --record=FILE
+        Record individual points to FILE.
     -o FILE
         Save parameters to FILE.
 """
@@ -16,6 +18,7 @@ from pathlib import Path
 import logging
 from importlib import import_module
 import json
+import csv
 
 from docopt import docopt
 import pandas as pd
@@ -37,7 +40,7 @@ def sample(space, state):
 
 def evaluate(point):
     "Evaluate the algorithm with a set of parameters."
-    algo = algo_mod.from_space(**point)
+    algo = algo_mod.from_params(**point)
     _log.info('evaluating %s', algo)
 
     algo = Recommender.adapt(algo)
@@ -71,20 +74,28 @@ def main(args):
     state = seedbank.numpy_random_state()
 
     points = []
-    mrrs = []
+    record_fn = args['--record']
+    if record_fn:
+        rcols = [name for (name, _dist) in algo_mod.space]
+        rcols.append('mrr')
+        record = csv.DictWriter(open(record_fn, 'w'), rcols)
+        record.writeheader()
+    else:
+        record = None
 
     for i in range(60):
         point = sample(algo_mod.space, state)
         _log.info('iter %d: %s', i + 1, point)
         mrr = evaluate(point)
         _log.info('iter %d: MRR=%0.4f', i + 1, mrr)
+        point['mrr'] = mrr
         points.append(point)
-        mrrs.append(mrr)
+        if record:
+            record.writerow(point)
 
-    order = np.argsort(mrrs)
-    best_point = points[order[-1]]
-    best_mrr = mrrs[order[-1]]
-    _log.info('finished in with MRR %.3f', best_mrr)
+    points = sorted(points, key=lambda p: p['mrr'], reverse=True)
+    best_point = points[0]
+    _log.info('finished in with MRR %.3f', best_point['mrr'])
     for p, v in best_point.items():
         _log.info('best %s: %s', p, v)
 
