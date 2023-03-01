@@ -1,0 +1,13 @@
+stages:
+  optimize-action-core:
+    foreach:
+    - ials
+    do:
+      cmd: python tune-algo.py -o params/${item}-action-core.json data/action-core ${item}
+      deps:
+      - data/action-core/tune-train.parquet
+      - data/action-core/tune-test.parquet
+      - bookdemo/algorithms/${item}.py
+      outs:
+      - params/${item}-action-core.json:
+          cache: false
