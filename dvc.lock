@@ -1,0 +1,22 @@
+schema: '2.0'
+stages:
+  optimize-action-core@ials:
+    cmd: python tune-algo.py -o params/ials-action-core.json -r params/ials-action-core.csv
+      data/action-core ials
+    deps:
+    - path: bookdemo/algorithms/ials.py
+      md5: 34ee6426ce317fc1d200df74ce44e583
+      size: 561
+    - path: data/action-core/tune-test.parquet
+      md5: 1a30559d5742fd80614f7d62b1c79f81
+      size: 258872
+    - path: data/action-core/tune-train.parquet
+      md5: 1cf98accb916f6ab84033525a1370ca3
+      size: 316139119
+    outs:
+    - path: params/ials-action-core.csv
+      md5: c59e2724c0f1d39f51ef35c34184c198
+      size: 5183
+    - path: params/ials-action-core.json
+      md5: 01492553d8f45f7857ae60c415086439
+      size: 149
