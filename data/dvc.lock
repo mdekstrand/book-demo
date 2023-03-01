@@ -1,0 +1,16 @@
+schema: '2.0'
+stages:
+  split-action-core:
+    cmd: python ../split-data.py gr-work-actions-2015-100-10core.parquet action-core
+    deps:
+    - path: ../split-data.py
+      md5: 2173800aa70743d06281c9bd77d7cb19
+      size: 1449
+    - path: gr-work-actions-2015-100-10core.parquet
+      md5: d80f69e6e18a82837a07eacba2083606
+      size: 349120065
+    outs:
+    - path: action-core
+      md5: a73c693b8480e7e784b5cd657ad032d4.dir
+      size: 632807320
+      nfiles: 4

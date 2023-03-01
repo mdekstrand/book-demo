@@ -1,0 +1,8 @@
+stages:
+  split-action-core:
+    cmd: python ../split-data.py gr-work-actions-2015-100-10core.parquet action-core
+    deps:
+    - ../split-data.py
+    - gr-work-actions-2015-100-10core.parquet
+    outs:
+    - action-core
