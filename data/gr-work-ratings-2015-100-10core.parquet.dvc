@@ -1,0 +1,12 @@
+md5: 272208fe6443ffc975ebc9bc0b585f9a
+frozen: true
+deps:
+- path: goodreads/full/gr-work-ratings-2015-100-10core.parquet
+  repo:
+    url: https://github.com/BoiseState/bookdata-internal
+    rev: teaching
+    rev_lock: 1a98d8a02ffe1759f9ce2c2d6dc517ef1c37590c
+outs:
+- md5: 4278235b61eecb8b4a65834475da060a
+  size: 123816044
+  path: gr-work-ratings-2015-100-10core.parquet
