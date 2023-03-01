@@ -78,7 +78,8 @@ def main(args):
     if record_fn:
         rcols = [name for (name, _dist) in algo_mod.space]
         rcols.append('mrr')
-        record = csv.DictWriter(open(record_fn, 'w'), rcols)
+        recfile = open(record_fn, 'w')
+        record = csv.DictWriter(recfile, rcols)
         record.writeheader()
     else:
         record = None
@@ -92,12 +93,16 @@ def main(args):
         points.append(point)
         if record:
             record.writerow(point)
+            recfile.flush()
 
     points = sorted(points, key=lambda p: p['mrr'], reverse=True)
     best_point = points[0]
     _log.info('finished in with MRR %.3f', best_point['mrr'])
     for p, v in best_point.items():
         _log.info('best %s: %s', p, v)
+
+    if record:
+        recfile.close()
 
     fn = args.get('-o', None)
     if fn:

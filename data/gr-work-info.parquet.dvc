@@ -1,0 +1,12 @@
+md5: 63a5743b500b151c8ae53e628c9786c1
+frozen: true
+deps:
+- path: goodreads/gr-work-info.parquet
+  repo:
+    url: https://github.com/BoiseState/bookdata-internal
+    rev: teaching
+    rev_lock: 1a98d8a02ffe1759f9ce2c2d6dc517ef1c37590c
+outs:
+- md5: 79b363824af58bff7fa61e645bbe23b1
+  size: 21837297
+  path: gr-work-info.parquet
