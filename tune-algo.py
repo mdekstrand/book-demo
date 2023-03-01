@@ -20,23 +20,24 @@ import json
 from docopt import docopt
 import pandas as pd
 import numpy as np
-from skopt import gp_minimize
-from scipy.optimize import OptimizeResult
 
 from lenskit import batch, topn
 from lenskit.algorithms import Recommender
 import seedbank
 
 _log = logging.getLogger('tune-algo')
-niters = 0
+
+def sample(space, state):
+    "Sample a single point from a search space."
+    return {
+        name: dist.rvs(random_state=state)
+        for (name, dist) in space
+    }
 
 
-def evaluate(space):
+def evaluate(point):
     "Evaluate the algorithm with a set of parameters."
-    global niters
-    niters += 1
-    _log.info('iter %d: %s', space)
-    algo = algo_mod.from_space(space)
+    algo = algo_mod.from_space(**point)
     _log.info('evaluating %s', algo)
 
     algo = Recommender.adapt(algo)
@@ -47,18 +48,7 @@ def evaluate(space):
     rla.add_metric(topn.recip_rank, k=5000)
     scores = rla.compute(recs, test_data, include_missing=True)
     mrr = scores['recip_rank'].fillna(0).mean()
-    _log.info('iter %d: MRR=%0.4f', niters, mrr)
-    return -mrr
-
-
-def check_stop(result: OptimizeResult):
-    if len(result.func_vals) >= 20:
-        fvs = np.sort(result.func_vals)
-        fvr = fvs[-5] - fvs[-1]
-        return fvr <= 1.0e-3
-    else:
-        return False
-
+    return mrr
 
 def main(args):
     global algo_mod, train_data, test_data, test_users
@@ -78,18 +68,30 @@ def main(args):
     test_data = pd.read_parquet(data / 'tune-test.parquet')
     test_users = test_data['user'].unique()
 
-    res = gp_minimize(evaluate, algo_mod.space, random_state=seedbank.numpy_random_state(), callback=check_stop)
-    _log.info('finished in %d steps with MRR %.3f', len(res.func_vals), res.fun)
+    state = seedbank.numpy_random_state()
 
-    params = {}
-    for dim, x in zip(algo_mod.space, res.x):
-        _log.info('best value for %s: %s', dim, x)
-        params[dim] = x
+    points = []
+    mrrs = []
+
+    for i in range(60):
+        point = sample(algo_mod.space, state)
+        _log.info('iter %d: %s', i + 1, point)
+        mrr = evaluate(point)
+        _log.info('iter %d: MRR=%0.4f', i + 1, mrr)
+        points.append(point)
+        mrrs.append(mrr)
+
+    order = np.argsort(mrrs)
+    best_point = points[order[-1]]
+    best_mrr = mrrs[order[-1]]
+    _log.info('finished in with MRR %.3f', best_mrr)
+    for p, v in best_point.items():
+        _log.info('best %s: %s', p, v)
 
     fn = args.get('-o', None)
     if fn:
         _log.info('saving params to %s', fn)
-        Path(fn).write_text(json.dumps(params))
+        Path(fn).write_text(json.dumps(best_point))
 
 
 if __name__ == '__main__':
