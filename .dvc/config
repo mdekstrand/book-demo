@@ -1,0 +1,7 @@
+[core]
+    remote = piret
+['remote "piret"']
+    url = s3://book-demo
+    endpointurl = https://abyss.boisestate.edu
+    profile = piret-minio
+    region = garage
